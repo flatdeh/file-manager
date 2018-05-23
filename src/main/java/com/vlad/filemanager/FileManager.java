@@ -8,17 +8,16 @@ public class FileManager {
     public static int calculateFiles(String path) {
         File calculatePath = new File(path);
         int count = 0;
+        File[] filesList = calculatePath.listFiles();
 
-        if (calculatePath.exists()) {
-            for (File file : calculatePath.listFiles()) {
+        if (calculatePath.exists() && filesList != null) {
+            for (File file : filesList) {
                 if (file.isDirectory()) {
                     count += calculateFiles(file.getPath());
                 } else {
                     count++;
                 }
             }
-        } else {
-            count = -1;
         }
         return count;
     }
@@ -26,31 +25,31 @@ public class FileManager {
     public static int calculateDirs(String path) {
         File calculatePath = new File(path);
         int count = 0;
-        if (calculatePath.exists()) {
-            for (File file : calculatePath.listFiles()) {
+        File[] filesList = calculatePath.listFiles();
+
+        if (calculatePath.exists() && filesList != null) {
+            for (File file : filesList) {
                 if (file.isDirectory()) {
                     count += calculateDirs(file.getPath());
                     count++;
                 }
             }
-        } else {
-            count = -1;
         }
         return count;
     }
 
     public static void copy(String from, String to) throws Exception {
         File fileFrom = new File(from);
-        File fileTo = new File(to + "/" + fileFrom.getName());
-
+        File fileTo = new File(to, fileFrom.getName());
+        File[] filesList = fileFrom.listFiles();
         if (fileFrom.exists()) {
-            if (fileFrom.isDirectory()) {
+            if (fileFrom.isDirectory() && filesList != null) {
                 fileTo.mkdirs();
-                for (File file : fileFrom.listFiles()) {
+                for (File file : filesList) {
                     if (file.isDirectory()) {
-                        copy(file.getPath(), fileTo + "/");
+                        copy(file.getPath(), fileTo.getPath());
                     } else {
-                        copyFile(file, new File(fileTo + "/" + file.getName()));
+                        copyFile(file, new File(fileTo, file.getName()));
                     }
                 }
             } else {
@@ -66,21 +65,29 @@ public class FileManager {
             byte[] buffer = new byte[BUFFER_SIZE];
             int count;
             while ((count = inputStream.read(buffer)) != -1) {
-                String value = new String(buffer, 0, count);
-                outputStream.write(value.getBytes());
+                outputStream.write(buffer, 0, count);
             }
         }
     }
 
-    public static void move(String from, String to) {
-        File fileFrom = new File(from);
-        File fileTo = new File(to);
+    public static void move(String from, String to) throws Exception {
+        copy(from, to);
+        delete(new File(from));
+    }
 
-        if (fileFrom.exists()) {
-            if (!fileTo.exists()) {
-                fileTo.mkdirs();
+    private static void delete(File path) {
+        File[] filesList = path.listFiles();
+
+        if (filesList != null) {
+            for (File file : filesList) {
+                if (file.isDirectory()) {
+                    delete(file);
+                } else {
+                    file.delete();
+                }
             }
-            fileFrom.renameTo(new File(fileTo + "/" + fileFrom.getName()));
+            path.delete();
         }
     }
+
 }
