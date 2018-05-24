@@ -42,8 +42,9 @@ public class FileManager {
         File fileFrom = new File(from);
         File fileTo = new File(to, fileFrom.getName());
         File[] filesList = fileFrom.listFiles();
+
         if (fileFrom.exists()) {
-            if (fileFrom.isDirectory() && filesList != null) {
+            if (filesList != null) {
                 fileTo.mkdirs();
                 for (File file : filesList) {
                     if (file.isDirectory()) {
@@ -52,11 +53,8 @@ public class FileManager {
                         copyFile(file, new File(fileTo, file.getName()));
                     }
                 }
-            } else {
-                copyFile(fileFrom, fileTo);
             }
         }
-
     }
 
     private static void copyFile(File fileFrom, File fileTo) throws IOException {
